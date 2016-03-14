@@ -1,6 +1,6 @@
 //*****************************************************************************************
 //  Program Filename	: Binary Read/Write Lab
-//  Version				: 2.0
+//  Version				: 3.0
 //  Author				: Swagat Ghimire
 //  Purpose				: Documenting information of an Auto Dealership
 //  Date				: September 29, 2015
@@ -18,117 +18,211 @@
 using namespace std;
 
 //Name Constant Definitions
-struct DealerInfo
+struct DealerInfo //Stores all info need by the dealer
 {
 	int inventoryNum;
 	char VIN[18];
 	char make[20];
 	char model[20];
-	char exColour[20];
-	char inColour[20];
+	char exColour[20]; //External Colour
+	char inColour[20]; //Internal Colour
 	char transmission[20];
 	float price;
 };
-vector<DealerInfo> cars;
+vector<DealerInfo> cars; //create a global vector of type DealerInfo to store all data (for ease of access)
 
-const string line = string(80, '_');
+const string line = string(80, '_'); //defines a line for easy use
 
 //*****************************************************************************************
-// Function Name:
-// Purpose: Purpose of function
-// Inputs to Function: parameters
-// Outputs from Function: return value
-// External Inputs to Function: e.g. cin, file, etc.
-// External Outputs from Function: e.g. cout, stderr, file, etc.
+// Function Name: Input
+// Purpose: To gather stored data from the file "CarRecords.dat"
+// Inputs to Function: None
+// Outputs from Function: None
+// External Inputs to Function: File: "CarRecords.dat"
+// External Outputs from Function: None
 //*****************************************************************************************
-
 void Input()
 {
-    int count = 0;
-    bool isEnd;
-    ifstream input;
-    DealerInfo currentCar;
-	input.open(FILE_IN, ios::in|ios::binary);
+    ifstream input; //Used to connect to the file
+    DealerInfo currentCar; //Temporarily store the current set of information before pushing to the global vector
+	input.open(FILE_IN, ios::in|ios::binary); //open the connection
  
-	//Check to be sure file is opened.  One way, use the fail function.
-	if(!input )
+	if(!input ) //Ensure that the file is opened
 	{
-		cout << "Can't find input file " << FILE_IN << ".\n";
-		cout << "Starting a new record.\n";
+		cout << "Can't find input file " << FILE_IN << ".\n"; //If not, tell them there is no info
+		cout << "Starting a new record.\n"; //Let them know they'll start a new file
 		system("Pause");
 		system("CLS");
 	}
-	else
+	else //If there is a file with data
 	{ 
- 		while (!input.eof())
+ 		while (!input.eof()) //Until the end of file is reached
  		{
-			input.read((char *) &currentCar, sizeof(DealerInfo));
-			cars.push_back(currentCar);
+			input.read((char *) &currentCar, sizeof(DealerInfo)); //Read info and store to temporary struct
+			cars.push_back(currentCar); //push the info on temporary struct to the main global vector
 		}
-		cars.pop_back();
+		cars.pop_back(); //I didn't recognize then end of file character as the end of file and did one more loop. Delete that false input.
 	}
-	input.close();
+	input.close(); //close connection
 }	
 
+//*****************************************************************************************
+// Function Name: Title
+// Purpose: To quickly output a title on demand
+// Inputs to Function: None
+// Outputs from Function: None
+// External Inputs to Function: None
+// External Outputs from Function: Cout of the title and a line.
+//*****************************************************************************************
 void Title()
 {
 	cout << "Car Dealership Inventory" << endl << line << endl;
 }
 
+//*****************************************************************************************
+// Function Name: Welcome
+// Purpose: To quickly output a welcoming statement
+// Inputs to Function: None
+// Outputs from Function: None
+// External Inputs to Function: File: None
+// External Outputs from Function: Cout of Welcome statement
+//*****************************************************************************************
 void Welcome()
 {
 	cout << "Welcome to the Car Dealership Inventory Program." << endl << endl;
 }
 
+//*****************************************************************************************
+// Function Name: Sort
+// Purpose: To sort information in the global vector
+// Inputs to Function: None
+// Outputs from Function: None
+// External Inputs to Function: File: None
+// External Outputs from Function: None
+//*****************************************************************************************
 void Sort()
 {
-	DealerInfo temp;
-	int max, checks;
-	int arraySize = cars.size();
-	for (int i = 0; i < arraySize; i++)
+	DealerInfo temp; //To store the largest value as space is made for it
+	int max, checks; // max is the location of the largest inventory num. Checks is the number of cars that must be checked (you don't have to check with previously foudn maxes)
+	int arraySize = cars.size(); //To store the number of cars in the vector
+	for (int i = 0; i < arraySize; i++) //Repeat as many times as there are cars
 	{
-		int checks = arraySize -1 - i;
-		max = 0;
-		for (int j = 0; j <= checks; j++)
+		int checks = arraySize -1 - i; //Check up until the last car that hasn't already been found to be a relative max
+		max = 0; //Set the first car as the max
+		for (int j = 0; j <= checks; j++) // check as many times as needed
 		{
-			if (cars[j].inventoryNum > cars[max].inventoryNum)
+			if (cars[j].inventoryNum > cars[max].inventoryNum) //if the next car has a bigger inventoryNum than the current max
 			{
-				max = j;
+				max = j; //then set that car as the max
 			}
 		}
-		temp = cars[max];
-		cars[max] = cars[checks];
-		cars[checks] = temp;
+		temp = cars[max]; //move the max to a temp location
+		cars[max] = cars[checks]; //move the last car that hasn't been found to be a max to the current max's position
+		cars[checks] = temp; //move the current max from the temp location to the furthest spot available.
 	}
 }
 
+//*****************************************************************************************
+// Function Name: Search
+// Purpose: To find the position in the array of a given inventory number
+// Inputs to Function: Inventory Number
+// Outputs from Function: Location in array of that number
+// External Inputs to Function: File: None
+// External Outputs from Function: None
+//*****************************************************************************************
 int Search(int InvNum)
 {
-	int result, isResult = 0;
-	for (int i = 0; i < cars.size(); i ++)
+	int result, isResult = 0; //result is the found location, isResult ensures that a result has been found
+	for (int i = 0; i < cars.size(); i ++) //for each element in the global vector
 	{
-		if (cars[i].inventoryNum == InvNum)
+		if (cars[i].inventoryNum == InvNum) // check the queried InvNum with it's inventoryNum, if there is a match
 		{
-			result = i;
-			isResult += 1;
+			result = i; //set the result to that location in the array
+			isResult += 1; //record that there is a match
 			break;
 		}
 	}
-	if (isResult > 0)
+	if (isResult > 0) //If there is a result
 	{
-		return result;
+		return result; //return the result
 	}
-	else
+	else //If there is no result
 	{
-		return -1;
+		return -1; //Return a negative value (can't be an array position). This is understood by other functions as no matches.
 	}
 }
 
+//*****************************************************************************************
+// Function Name: DeleteVehicle
+// Purpose: To remove a vehicle from the directory
+// Inputs to Function: vehicleNum - the position of the vehicle in teh array
+// Outputs from Function: None
+// External Inputs to Function: File: cin of responses to prompts (i.e. inventoryNum or isDelete Value) 
+// External Outputs from Function: cout of prompts and vehicle information
+//*****************************************************************************************
+void DeleteVehicle(int vehicleNum)
+{
+	int searchQuery, searchResult; //Used to find the location of the vehicle should it's position be unknown
+	char isDelete; //used ensure that the user wishes to delete
+	system("CLS");
+	Title();
+	if (vehicleNum < 0) //if the user hasn't decided on the vehicle to delte, this function will be seeded with -1
+	{
+		cout << "Please enter the inventory number of the vehicle you wish to find."; //it will then ask them for a invNum
+		do
+		{
+			cout << "\nEnter Number to Search (1000-9999): ";
+			cin >> searchQuery;
+		} while (searchQuery < 1000 || searchQuery > 9999); //Error Prevention
+	
+		vehicleNum = Search(searchQuery); //Input the inventoryNum into the search function
+	}
+	if (vehicleNum == -1) //If it does not find a match
+	{
+		cout << "There is no vehicle with the inventory number " << searchQuery << ".\n"; //inform user
+		system ("Pause");
+		system ("CLS");
+	}
+	else //if there is a match
+	{
+		cout << "Vehicle Information:\n\n"; //Give user all the vehicle info
+		cout << "Inventory Number: " << cars[vehicleNum].inventoryNum << endl;
+		cout << "Auto VIN: " << cars[vehicleNum].VIN << endl;
+		cout << "Make: " << cars[vehicleNum].make << endl;
+		cout << "Model: " << cars[vehicleNum].model << endl;
+		cout << "Exterior Colour: " << cars[vehicleNum].exColour << endl;
+		cout << "Interior Colour: " << cars[vehicleNum].inColour << endl;
+		cout << "Transmission Type: " << cars[vehicleNum].transmission << endl;
+		cout << "Enter Retail Price: $" << cars[vehicleNum].price << endl << endl;
+		cout << "\nWould you like to delete this car?"; //ask that they wish to delete
+		do //Ensure that a valid answer is selected
+		{
+			cout << "\nEnter 'y' or 'n': "; //give options
+			cin >> isDelete;
+		} while (tolower(isDelete) != 'n' && tolower(isDelete) != 'y'); //Error Prevention
+		if (tolower(isDelete) == 'y') //if they confirm wanting to delte
+		{
+			cars[vehicleNum].inventoryNum = 10000; //give that vehicle an invNum bigger than any valid options
+			Sort(); //Sort it to move that vehicle to the end of the array
+			cars.pop_back(); //Delete the last item in the array
+		} 
+	}
+	system ("CLS"); 
+}
+
+//*****************************************************************************************
+// Function Name: EditInfo
+// Purpose: To allow user to edit information of previously declared cars
+// Inputs to Function: ChangedCar - car they wish to change
+// Outputs from Function: ChangedCar - the car data after edits
+// External Inputs to Function: File: cin of new information for the old cars
+// External Outputs from Function: Cout of prompts and Vehicle Information 
+//*****************************************************************************************
 DealerInfo EditInfo(DealerInfo ChangedCar)
 {
-	DealerInfo OldCar = ChangedCar;
-	char isCorrect, editChoice;
-	int oldNum;
+	DealerInfo OldCar = ChangedCar; //Store old info (used to ensure they can input the same inventoryNum if they messed up)
+	char isCorrect, editChoice; //to determine if they wish to edit at all, and what they want to edit
+	int oldNum; //
 	do
 	{
 		system ("CLS");
@@ -207,23 +301,24 @@ DealerInfo EditInfo(DealerInfo ChangedCar)
 							break;
 			}
 		}
-	}while (tolower(isCorrect) != 'n');
+	} while (tolower(isCorrect) != 'n');
+	
 	return ChangedCar;
 }
 
 char Menu()
 {
 	char selection = '0';
-	cout << "Menu\n\t1)Enter a New Vehicle\n\t2)Display Vehicle Inventory\n\t3)Search for Vehicle (By Inventory Number)\n\t4)Exit This Program\n";
+	cout << "Menu\n\t1)Enter a New Vehicle\n\t2)Display Vehicle Inventory\n\t3)Search for Vehicle (By Inventory Number)\n\t4)Delete A Vehicle\n\t5)Exit This Program\n";
 	do
 	{
 		cout << "\nSelection: ";
 		cin >> selection;
-		if (selection !='1' && selection !='2' && selection !='3' && selection !='4')
+		if (selection !='1' && selection !='2' && selection !='3' && selection !='4'&& selection !='5')
 		{
 			cout << "Invalid Selection.\n";
 		}
-	} while (selection !='1' && selection !='2' && selection !='3' && selection !='4');
+	} while (selection !='1' && selection !='2' && selection !='3' && selection !='4' && selection !='5');
 	return selection;
 }
 
@@ -303,6 +398,7 @@ void DisplayInfo()
 		if (infoNum != 0)
 		{
 			cars[foundCar] = EditInfo(cars[foundCar]);
+			DeleteVehicle[foundCar];
 		}
 		
 	} while (infoNum != 0);
@@ -335,6 +431,8 @@ void UserSearch()
 		cout << "A result has been found.\n";
 		system ("PAUSE");
 		foundData = EditInfo(cars[searchResult]);
+		cars[searchResult] = foundData;
+		DeleteVehicle(searchResult);
 	}
 }
 
@@ -368,10 +466,13 @@ int main()
 			case '2': 	DisplayInfo();
 						break;
 			case '3':	UserSearch();
+						break;
+			case '4':	DeleteVehicle(-1);
 						break;			
 		}
 		Sort();
-	} while (userChoice != '4');
+		Output(); //Output each time they do anything to ensure that accidental exits won't corrupt data.
+	} while (userChoice != '5');
 	
 	Output();
 	cout << "Your data has been output to " << FILE_OUT << ".\n";
