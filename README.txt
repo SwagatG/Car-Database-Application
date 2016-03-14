@@ -1,0 +1,1 @@
+This program was created by Swagat Ghimire for a school project. It allows a user to catalog information about various vehicles. The user may then edit any information, search for vehicles or edit the vehicle information.
